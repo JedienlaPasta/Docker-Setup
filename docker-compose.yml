@@ -1,15 +1,12 @@
-version: "3.8"
-
 services:
-  nextjs:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: imagen-sibas:latest
-    container_name: sibas-container
-    ports:
-      - "8080:3000"
-    env_file:
-      - .env
-    depends_on: []
+  sibas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sibas:latest
+    container_name: sibas-container
+    ports:
+      - "8080:3000"
+    env_file:
+      - .env
     restart: unless-stopped
