@@ -1,10 +1,11 @@
 # Etapa base
-FROM node:18 AS base
+FROM node:18-alpine AS base # <--- Changed here
 WORKDIR /app
 
 # Etapa de dependencias
 FROM base AS deps
-RUN apt-get update && apt-get install -y ghostscript && rm -rf /var/lib/apt/lists/*
+# Instead of apt-get, use apk for Alpine
+RUN apk update && apk add --no-cache ghostscript # <--- Changed here
 COPY package.json package-lock.json* ./
 RUN npm install --include=optional
 
@@ -19,7 +20,8 @@ FROM base AS production
 ENV NODE_ENV=production
 
 # 👇 Instalar Ghostscript en la imagen final
-RUN apt-get update && apt-get install -y ghostscript && rm -rf /var/lib/apt/lists/*
+# Instead of apt-get, use apk for Alpine
+RUN apk update && apk add --no-cache ghostscript # <--- Changed here
 
 COPY --from=build /app/public ./public
 COPY --from=build /app/.next ./.next
