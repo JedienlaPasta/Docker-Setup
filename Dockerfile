@@ -1,32 +1,39 @@
-# Etapa base
 FROM node:18-alpine AS base
 WORKDIR /app
 
-# Etapa de dependencias
+# Deps phase
 FROM base AS deps
-# Instead of apt-get, use apk for Alpine
-RUN apk update && apk add --no-cache ghostscript
 COPY package.json package-lock.json* ./
-RUN npm install --include=optional
+RUN npm ci && npm cache clean --force
 
-# Etapa de build
+# Build phase
 FROM base AS build
+WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# Etapa final de producción
+# Production phase
 FROM base AS production
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# 👇 Instalar Ghostscript en la imagen final
-# Instead of apt-get, use apk for Alpine
-RUN apk update && apk add --no-cache ghostscript
+# Create user and group
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Install ghostscript for PDF support
+RUN apk update && apk add --no-cache ghostscript \
+    && rm -rf /var/cache/apk/*
+
 
 COPY --from=build /app/public ./public
-COPY --from=build /app/.next ./.next
-COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
 
+COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
 EXPOSE 3000
-CMD ["npm", "start"]
+
+CMD ["node", "server.js"]
