@@ -26,7 +26,6 @@ RUN addgroup --system --gid 1001 nodejs && \
 RUN apk update && apk add --no-cache ghostscript \
     && rm -rf /var/cache/apk/*
 
-
 COPY --from=build /app/public ./public
 COPY --from=build /app/package.json ./package.json
 
