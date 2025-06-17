@@ -1,3 +1,8 @@
 sudo docker compose down
 sudo DOCKER_BUILDKIT=1 docker compose build --no-cache --progress=plain
 sudo docker compose up --force-recreate -d
+
+
+sudo docker compose down && sudo DOCKER_BUILDKIT=1 docker compose build --no-cache && sudo docker compose up --force-recreate -d
+
+sudo docker compose down && sudo DOCKER_BUILDKIT=1 docker compose build --no-cache --progress=plain && sudo docker compose up --force-recreate -d
