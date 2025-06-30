@@ -27,7 +27,6 @@ RUN apk update && apk add --no-cache ghostscript \
     && rm -rf /var/cache/apk/*
 
 COPY --from=build /app/public ./public
-COPY --from=build /app/package.json ./package.json
 
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
