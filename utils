@@ -9,11 +9,22 @@ sudo systemctl status nginx
 sudo systemctl reload nginx
 sudo systemctl restart nginx
 
+
+## Limpieza sv
+
 # Limpiar docker files
 sudo docker system prune -af
 
+# Limpiar cache sublime
+sudo rm -rf /root/.cache/sublime-text/Index
+sudo rm -rf /root/.cache/sublime-text/Cache
 
-# Mantenimiento Manual
+# Checkear discos
+sudo mate-disk-usage-analyzer
+df -h
+
+
+## Mantenimiento Manual
 
 # Sibas
 sudo touch /etc/nginx/sibas.maintenance.flag
@@ -22,14 +33,12 @@ sudo systemctl reload nginx
 sudo rm /etc/nginx/sibas.maintenance.flag
 sudo systemctl reload nginx
 
-
 # Saberes
 sudo touch /etc/nginx/saberes.maintenance.flag
 sudo systemctl reload nginx
 
 sudo rm /etc/nginx/saberes.maintenance.flag
 sudo systemctl reload nginx
-
 
 # Ambos
 sudo touch /etc/nginx/sibas.maintenance.flag
