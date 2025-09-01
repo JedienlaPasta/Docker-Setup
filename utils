@@ -10,6 +10,8 @@ sudo systemctl reload nginx
 sudo systemctl restart nginx
 sudo systemctl start nginx
 
+# Certificados
+sudo certbot certonly --manual --preferred-challenges dns -d sibas.elquisco.cl
 
 ## Limpieza sv
 
