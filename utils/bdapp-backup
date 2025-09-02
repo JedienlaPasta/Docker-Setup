@@ -1,0 +1,41 @@
+-- Backup de todas las DBs
+DECLARE @DatabaseName NVARCHAR(128);
+DECLARE @FileName NVARCHAR(200);
+DECLARE @DateTime NVARCHAR(50);
+DECLARE @SQL NVARCHAR(MAX);
+
+-- Generar timestamp como '2025-08-11_1545'
+SET @DateTime = REPLACE(CONVERT(NVARCHAR, GETDATE(), 120), ':', '');
+SET @DateTime = REPLACE(@DateTime, ' ', '_');
+
+-- Cursor para recorrer todas las bases de datos de usuario
+DECLARE db_cursor CURSOR FOR
+SELECT name
+FROM sys.databases
+WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb')  -- Excluir bases del sistema
+  AND state_desc = 'ONLINE'                              -- Solo bases activas
+  AND is_read_only = 0;                                  -- No de solo lectura
+
+OPEN db_cursor;
+FETCH NEXT FROM db_cursor INTO @DatabaseName;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Construir la ruta de backup
+    SET @FileName = N'C:\Backups\' + @DatabaseName + '\' + @DatabaseName + '_' + @DateTime + '.bak';
+
+    -- Construir SQL dinámico para backup
+    SET @SQL = '
+        BACKUP DATABASE [' + @DatabaseName + ']
+        TO DISK = N''' + @FileName + '''
+        WITH INIT, FORMAT, STATS = 10, COMPRESSION;
+    ';
+
+    PRINT 'Ejecutando backup para base de datos: ' + @DatabaseName;
+    EXEC sp_executesql @SQL;
+
+    FETCH NEXT FROM db_cursor INTO @DatabaseName;
+END
+
+CLOSE db_cursor;
+DEALLOCATE db_cursor;
