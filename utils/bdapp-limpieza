@@ -1,0 +1,40 @@
+# Carpeta raíz donde están los backups por base de datos
+$rootBackupPath = "C:\Backups\"
+
+# Días de retención (modifica si deseas más o menos días)
+$retentionDays = 14
+
+# Fecha límite de retención
+$cutoffDate = (Get-Date).AddDays(-$retentionDays)
+
+# Obtener todas las carpetas dentro de la ruta raíz
+$databaseFolders = Get-ChildItem -Path $rootBackupPath -Directory
+
+foreach ($folder in $databaseFolders) {
+    $folderPath = $folder.FullName
+
+    # Obtener archivos .bak dentro de la subcarpeta
+    $files = Get-ChildItem -Path $folderPath -Filter "*.bak"
+
+    foreach ($file in $files) {
+        try {
+            # Intentar extraer la fecha del nombre del archivo usando regex
+            if ($file.Name -match '_(\d{8})_(\d{4})\.bak$') {
+                $datePart = $matches[1]  # YYYYMMDD
+                $timePart = $matches[2]  # HHmm
+
+                $fileDate = [datetime]::ParseExact($datePart + $timePart, "yyyyMMddHHmm", $null)
+
+                # Comparar con la fecha de corte
+                if ($fileDate -lt $cutoffDate) {
+                    Remove-Item -Path $file.FullName -Force
+                    Write-Host "Eliminado: $($file.FullName)"
+                }
+            } else {
+                Write-Host "Formato de nombre inválido: $($file.FullName)"
+            }
+        } catch {
+            Write-Host "Error al procesar $($file.FullName): $($_.Exception.Message)"
+        }
+    }
+}
